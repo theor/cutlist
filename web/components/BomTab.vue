@@ -10,13 +10,17 @@ const formatDistance = useFormatDistance();
 const rows = computed(() => {
   if (data.value == null) return [];
 
+  const partKey = (part: BoardLayoutLeftover) =>
+    `${part.name}|${part.material}|${part.thicknessM}|${part.widthM}|${part.lengthM}`;
+
   const map = [
     ...data.value?.layouts.flatMap((layout) => layout.placements),
     ...data.value?.leftovers,
-  ].reduce<Map<number, BoardLayoutLeftover[]>>((acc, part) => {
-    const items = acc.get(part.partNumber) ?? [];
+  ].reduce<Map<string, BoardLayoutLeftover[]>>((acc, part) => {
+    const key = partKey(part);
+    const items = acc.get(key) ?? [];
     items.push(part);
-    acc.set(part.partNumber, items);
+    acc.set(key, items);
     return acc;
   }, new Map());
 
