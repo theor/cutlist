@@ -96,29 +96,83 @@ export const PACKERS: Record<
   space: createTightPacker,
 };
 
+type SortKey = 'area' | 'height' | 'width' | 'perimeter';
+const SORT_KEYS: SortKey[] = ['area', 'height', 'width', 'perimeter'];
+
+function makePartComparator(
+  sortKey: SortKey,
+): (a: PartToCut, b: PartToCut) => number {
+  const secondary = (p: PartToCut): number => {
+    switch (sortKey) {
+      case 'area':
+        return p.size.width * p.size.length;
+      case 'height':
+        return p.size.length;
+      case 'width':
+        return p.size.width;
+      case 'perimeter':
+        return 2 * (p.size.width + p.size.length);
+    }
+  };
+  return (a, b) => {
+    const materialCompare = a.material.localeCompare(b.material);
+    if (materialCompare !== 0) return materialCompare;
+    const thicknessCompare = b.size.thickness - a.size.thickness;
+    if (Math.abs(thicknessCompare) > 1e-5) return thicknessCompare;
+    return secondary(b) - secondary(a);
+  };
+}
+
+function scorePlacements(result: {
+  layouts: PotentialBoardLayout[];
+  leftovers: PartToCut[];
+}): { boards: number; fillRate: number } {
+  const boards = result.layouts.length;
+  const placedArea = result.layouts
+    .flatMap((l) => l.placements)
+    .reduce((sum, p) => sum + p.width * p.height, 0);
+  const binArea = result.layouts.reduce(
+    (sum, l) => sum + l.stock.width * l.stock.length,
+    0,
+  );
+  return { boards, fillRate: binArea > 0 ? placedArea / binArea : 0 };
+}
+
 function placeAllParts(
   config: Config,
   parts: PartToCut[],
   stock: Stock[],
   packer: Packer<PartToCut>,
 ): { layouts: PotentialBoardLayout[]; leftovers: PartToCut[] } {
+  let best: { layouts: PotentialBoardLayout[]; leftovers: PartToCut[] } | null =
+    null;
+  let bestScore: { boards: number; fillRate: number } | null = null;
+
+  for (const key of SORT_KEYS) {
+    const result = placeAllPartsWithOrdering(config, parts, stock, packer, key);
+    const score = scorePlacements(result);
+    if (
+      best === null ||
+      score.boards < bestScore!.boards ||
+      (score.boards === bestScore!.boards &&
+        score.fillRate > bestScore!.fillRate)
+    ) {
+      best = result;
+      bestScore = score;
+    }
+  }
+  return best!;
+}
+
+function placeAllPartsWithOrdering(
+  config: Config,
+  parts: PartToCut[],
+  stock: Stock[],
+  packer: Packer<PartToCut>,
+  sortKey: SortKey,
+): { layouts: PotentialBoardLayout[]; leftovers: PartToCut[] } {
   const extraSpace = new Distance(config.extraSpace).m;
-  const unplacedParts = new Set(
-    [...parts].sort(
-      // Sort by material, thickness, and area to ensure parts of the same
-      // material and thickness are placed together, and that larger items are
-      // placed first.
-      (a, b) => {
-        const materialCompare = a.material.localeCompare(b.material);
-        if (materialCompare != 0) return materialCompare;
-
-        const thicknessCompare = b.size.thickness - a.size.thickness;
-        if (Math.abs(thicknessCompare) > 1e-5) return thicknessCompare;
-
-        return b.size.width * b.size.length - a.size.width * a.size.length;
-      },
-    ),
-  );
+  const unplacedParts = new Set([...parts].sort(makePartComparator(sortKey)));
   const leftovers: PartToCut[] = [];
   const layouts: PotentialBoardLayout[] = [];
 
