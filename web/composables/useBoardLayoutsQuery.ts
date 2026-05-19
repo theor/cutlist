@@ -18,7 +18,10 @@ export default function () {
     enabled: computed(() => url.value != null),
   });
 
+  const regenerateKey = ref(0);
+
   const layouts = computed(() => {
+    regenerateKey.value;
     const parts = partsQuery.data.value;
     if (
       parts == null ||
@@ -39,8 +42,13 @@ export default function () {
     return generateBoardLayouts(toRaw(parts), parseStock(stock.value), config);
   });
 
+  function regenerate() {
+    regenerateKey.value++;
+  }
+
   return {
     ...partsQuery,
     data: layouts,
+    regenerate,
   };
 }

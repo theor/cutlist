@@ -1,8 +1,11 @@
 <script lang="ts" setup>
 import type { HorizontalNavigationLink } from '#ui/types';
 
-const { data: boardLayouts, isFetching: isFetchingLayouts } =
-  useBoardLayoutsQuery();
+const {
+  data: boardLayouts,
+  isFetching: isFetchingLayouts,
+  regenerate,
+} = useBoardLayoutsQuery();
 const refresh = useRefreshOnshapeQueries();
 
 const warningsBadge = computed(() => {
@@ -67,6 +70,14 @@ const editProject = useEditProject();
           size="sm"
           :loading="isFetchingLayouts"
           @click="refresh"
+        />
+        <UButton
+          class="print:hidden"
+          title="Regenerate layout"
+          icon="i-heroicons-sparkles"
+          color="gray"
+          size="sm"
+          @click="regenerate"
         />
         <UButton
           class="print:hidden"
