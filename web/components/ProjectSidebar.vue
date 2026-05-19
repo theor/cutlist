@@ -5,6 +5,7 @@ const {
   data: boardLayouts,
   isFetching: isFetchingLayouts,
   regenerate,
+  dumpTestCase,
 } = useBoardLayoutsQuery();
 const refresh = useRefreshOnshapeQueries();
 
@@ -86,6 +87,14 @@ const editProject = useEditProject();
           color="gray"
           size="sm"
           @click="editProject(project)"
+        />
+        <UButton
+          class="print:hidden"
+          title="Download test case JSON"
+          icon="i-heroicons-arrow-down-tray"
+          color="gray"
+          size="sm"
+          @click="dumpTestCase"
         />
       </div>
 

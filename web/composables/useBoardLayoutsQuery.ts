@@ -46,9 +46,46 @@ export default function () {
     regenerateKey.value++;
   }
 
+  function dumpTestCase() {
+    const parts = partsQuery.data.value;
+    if (
+      parts == null ||
+      bladeWidth.value == null ||
+      extraSpace.value == null ||
+      optimize.value == null ||
+      distanceUnit.value == null ||
+      stock.value == null
+    )
+      return;
+
+    const config: Config = {
+      bladeWidth: new Distance(bladeWidth.value + distanceUnit.value).m,
+      extraSpace: new Distance(extraSpace.value + distanceUnit.value).m,
+      optimize: optimize.value === 'Cuts' ? 'cuts' : 'space',
+      precision: 1e-5,
+    };
+
+    const testCase = {
+      parts: toRaw(parts),
+      stock: parseStock(stock.value),
+      config,
+    };
+
+    const blob = new Blob([JSON.stringify(testCase, null, 2)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'test-case.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return {
     ...partsQuery,
     data: layouts,
     regenerate,
+    dumpTestCase,
   };
 }
