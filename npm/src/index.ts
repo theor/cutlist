@@ -59,7 +59,13 @@ export function generateBoardLayouts(
   );
   if (boards.length === 0) throw Error('You must include at least 1 stock.');
 
-  const { layouts, leftovers } = placeAllParts(config, parts, boards, packer);
+  const { layouts: initialLayouts, leftovers } = placeAllParts(
+    config,
+    parts,
+    boards,
+    packer,
+  );
+  const layouts = tryConsolidateTail(config, initialLayouts, boards);
   const minimizedLayouts = layouts.map((layout) =>
     minimizeLayoutStock(config, layout, boards, packer),
   );
@@ -95,6 +101,87 @@ export const PACKERS: Record<
   cuts: createCutPacker,
   space: createTightPacker,
 };
+
+/**
+ * After the initial greedy placement, attempt to reduce the board count by
+ * trying two strategies repeatedly until no further improvement is found:
+ *
+ * Strategy A: Take the last board's parts and try merging them into each
+ * individual earlier board by repacking (earlier board's parts + last board's
+ * parts) with TightPacker across all sort orderings.
+ *
+ * Strategy B: Repack the last k boards' parts together with TightPacker across
+ * all sort orderings (original approach, handles cases where rearranging across
+ * multiple boards helps).
+ */
+function tryConsolidateTail(
+  config: Config,
+  layouts: PotentialBoardLayout[],
+  stock: Stock[],
+): PotentialBoardLayout[] {
+  if (layouts.length <= 1) return layouts;
+
+  const tightPacker = createTightPacker<PartToCut>();
+
+  // Strategy A: try merging the last board into each earlier board
+  const lastBoard = layouts[layouts.length - 1];
+  const lastParts = lastBoard.placements.map((p) => p.data);
+  for (let i = 0; i < layouts.length - 1; i++) {
+    const targetBoard = layouts[i];
+    const targetParts = targetBoard.placements.map((p) => p.data);
+    const combinedParts = [...targetParts, ...lastParts];
+
+    for (const sortKey of SORT_KEYS) {
+      const { layouts: repacked, leftovers } = placeAllPartsWithOrdering(
+        config,
+        combinedParts,
+        [targetBoard.stock],
+        tightPacker,
+        sortKey,
+      );
+      if (leftovers.length === 0 && repacked.length === 1) {
+        const newLayouts = [
+          ...layouts.slice(0, i),
+          repacked[0],
+          ...layouts.slice(i + 1, layouts.length - 1),
+        ];
+        return tryConsolidateTail(config, newLayouts, stock);
+      }
+    }
+  }
+
+  // Strategy B: repack last k boards together
+  for (let k = 2; k <= Math.min(layouts.length, 4); k++) {
+    const headLayouts = layouts.slice(0, -k);
+    const tailParts = layouts
+      .slice(-k)
+      .flatMap((l) => l.placements.map((p) => p.data));
+
+    let bestTail: PotentialBoardLayout[] | null = null;
+    for (const sortKey of SORT_KEYS) {
+      const { layouts: tightLayouts, leftovers } = placeAllPartsWithOrdering(
+        config,
+        tailParts,
+        stock,
+        tightPacker,
+        sortKey,
+      );
+      if (
+        leftovers.length === 0 &&
+        tightLayouts.length < k &&
+        (bestTail === null || tightLayouts.length < bestTail.length)
+      ) {
+        bestTail = tightLayouts;
+      }
+    }
+
+    if (bestTail !== null) {
+      return tryConsolidateTail(config, [...headLayouts, ...bestTail], stock);
+    }
+  }
+
+  return layouts;
+}
 
 type SortKey = 'area' | 'height' | 'width' | 'perimeter';
 const SORT_KEYS: SortKey[] = ['area', 'height', 'width', 'perimeter'];
@@ -177,12 +264,9 @@ function placeAllPartsWithOrdering(
   const layouts: PotentialBoardLayout[] = [];
 
   while (unplacedParts.size > 0) {
-    // Extract all parts from queue, will add them back if not placed
     const unplacedPartsArray = [...unplacedParts];
     const targetPart = unplacedPartsArray[0];
 
-    // Find board to put part on
-    // Add a new board if one doesn't match the part
     const board = stock.find((board) =>
       isValidStock(board, targetPart, config.precision),
     );
@@ -205,14 +289,12 @@ function placeAllPartsWithOrdering(
       board.length - extraSpace,
     );
 
-    // Fill the bin
     const partsToPlace = unplacedPartsArray
       .filter((part) => isValidStock(board, part, config.precision))
       .map(
         (part) => new Rectangle(part, 0, 0, part.size.width, part.size.length),
       );
 
-    // Fill the layout
     const res = packer.pack(boardRect, partsToPlace, getPackerOptions(config));
     if (res.placements.length > 0) {
       layouts.push(layout);
