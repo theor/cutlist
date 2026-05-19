@@ -7,7 +7,20 @@ const props = defineProps<{
 }>();
 
 const container = ref<HTMLDivElement>();
-const isHovered = useElementHover(container);
+const isLocallyHovered = useElementHover(container);
+const hoveredPartNumber = useHoveredPart();
+
+const isHighlighted = computed(
+  () =>
+    isLocallyHovered.value ||
+    hoveredPartNumber.value === props.placement.partNumber,
+);
+
+watch(isLocallyHovered, (hovered) => {
+  if (hovered) hoveredPartNumber.value = props.placement.partNumber;
+  else if (hoveredPartNumber.value === props.placement.partNumber)
+    hoveredPartNumber.value = null;
+});
 
 const width = usePx(() => props.placement.widthM);
 const height = usePx(() => props.placement.lengthM);
@@ -32,12 +45,13 @@ const { showPartNumbers } = useProjectSettings();
   >
     <UPlaceholder
       class="overflow-hidden"
-      :color="isHovered ? 'primary' : 'white'"
+      :color="isHighlighted ? 'primary' : 'white'"
       :style="`width:${width};height:${height}`"
     >
       <p
         v-if="showPartNumbers"
         class="w-full text-clip text-gray-500 dark:text-gray-400 print:text-black group-hover:text-primary text-right p-px"
+        :class="{ 'text-primary': isHighlighted }"
         :style="`font-size:${fontSize};line-height:${fontSize}`"
       >
         {{ placement.partNumber }}
@@ -45,7 +59,7 @@ const { showPartNumbers } = useProjectSettings();
     </UPlaceholder>
     <Teleport to="body">
       <PartDetailsTooltip
-        v-if="isHovered"
+        v-if="isLocallyHovered"
         :part="placement"
         class="pointer-events-none"
       />
