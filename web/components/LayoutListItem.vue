@@ -13,6 +13,7 @@ const width = useFormattedDistance(() => props.layout.stock.widthM);
 const length = useFormattedDistance(() => props.layout.stock.lengthM);
 
 const showDimensions = useShowDimensions();
+const showCuts = useShowCuts();
 
 // Printable page box (Letter/A4 safe, with 0.4in @page margins). Kept a touch
 // under the real printable area so the browser never "shrink-to-fit"s the page.
@@ -67,6 +68,7 @@ const printScale = computed(() => {
               v-for="placement of layout.placements"
               :placement="placement"
             />
+            <CutLinesOverlay v-if="showCuts" :layout="layout" />
           </div>
           <!-- Width dimension below -->
           <div

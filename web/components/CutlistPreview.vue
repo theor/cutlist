@@ -4,6 +4,7 @@ const { data, isLoading, error } = useBoardLayoutsQuery();
 const container = ref<HTMLDivElement>();
 const { scale, resetZoom, zoomIn, zoomOut } = usePanZoom(container);
 const showDimensions = useShowDimensions();
+const showCuts = useShowCuts();
 const printPage = () => window.print();
 </script>
 
@@ -46,6 +47,14 @@ const printPage = () => window.print();
           :color="showDimensions ? 'primary' : 'black'"
           icon="i-heroicons-arrows-right-left"
           @click="showDimensions = !showDimensions"
+        />
+        <UButton
+          title="Toggle cut order"
+          square
+          size="lg"
+          :color="showCuts ? 'primary' : 'black'"
+          icon="i-heroicons-scissors"
+          @click="showCuts = !showCuts"
         />
         <UButton
           title="Print"

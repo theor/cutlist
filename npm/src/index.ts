@@ -22,6 +22,7 @@ import type { Visualizer } from './visualizers';
 
 export * from './types';
 export * from './utils/units';
+export * from './cuts';
 
 /**
  * Given a list of parts, stock, and some configuration, return the board
