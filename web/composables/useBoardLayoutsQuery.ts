@@ -3,10 +3,10 @@ import {
   Distance,
   generateBoardLayouts,
   type Config,
+  type PartToCut,
 } from '@aklinker1/cutlist';
 
 export default function () {
-  const loader = useOnshapeLoader();
   const url = useAssemblyUrl();
   const { bladeWidth, optimize, extraSpace, distanceUnit, stock } =
     useProjectSettings();
@@ -14,7 +14,8 @@ export default function () {
 
   const partsQuery = useQuery({
     queryKey: ['onshape', 'board-layouts', url],
-    queryFn: () => loader.getParts(url.value!),
+    queryFn: () =>
+      $fetch<PartToCut[]>('/api/parts', { query: { url: url.value! } }),
     enabled: computed(() => url.value != null),
   });
 

@@ -11,8 +11,10 @@ const hoveredPartNumber = useHoveredPart();
 const rows = computed(() => {
   if (data.value == null) return [];
 
-  const partKey = (part: BoardLayoutLeftover) =>
-    `${part.name}|${part.material}|${part.thicknessM}|${part.widthM}|${part.lengthM}`;
+  const partKey = (part: BoardLayoutLeftover) => {
+    const [w, l] = [part.widthM, part.lengthM].sort((a, b) => a - b);
+    return `${part.name}|${part.material}|${part.thicknessM}|${w}|${l}`;
+  };
 
   const map = [
     ...data.value?.layouts.flatMap((layout) => layout.placements),
@@ -34,7 +36,7 @@ const rows = computed(() => {
         'Part Name': part.name,
         QTY: instanceList.length,
         Material: part.material,
-        [`Size (${distanceUnit.value})`]: `${formatDistance(part.thicknessM)} × ${formatDistance(part.widthM)} × ${formatDistance(part.lengthM)}`,
+        [`Size (${distanceUnit.value})`]: `${formatDistance(part.thicknessM)} × ${formatDistance(Math.min(part.widthM, part.lengthM))} × ${formatDistance(Math.max(part.widthM, part.lengthM))}`,
         class:
           hoveredPartNumber.value === part.partNumber
             ? 'bg-primary-50 dark:bg-primary-950'

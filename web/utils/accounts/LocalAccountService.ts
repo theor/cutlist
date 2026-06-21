@@ -62,6 +62,9 @@ export function createLocalAccountService(): AccountService {
     if (distanceUnit != null)
       settings.distanceUnit = distanceUnit as AccountSettings['distanceUnit'];
 
+    const stock = localStorage.getItem(getKey('stock', projectId));
+    if (stock != null) settings.stock = stock;
+
     return {
       ...DEFAULT_SETTINGS,
       ...settings,
