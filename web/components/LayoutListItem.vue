@@ -3,6 +3,7 @@ import { type BoardLayout } from '@aklinker1/cutlist';
 
 const props = defineProps<{
   layout: BoardLayout;
+  index: number;
 }>();
 
 const widthPx = usePx(() => props.layout.stock.widthM);
@@ -68,7 +69,11 @@ const printScale = computed(() => {
               v-for="placement of layout.placements"
               :placement="placement"
             />
-            <CutLinesOverlay v-if="showCuts" :layout="layout" />
+            <CutLinesOverlay
+              v-if="showCuts"
+              :layout="layout"
+              :layout-index="index"
+            />
           </div>
           <!-- Width dimension below -->
           <div

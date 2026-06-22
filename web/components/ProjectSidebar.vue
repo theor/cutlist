@@ -29,6 +29,12 @@ const links = computed<HorizontalNavigationLink[]>(() => [
     click: () => void (tab.value = 'boards'),
   },
   {
+    label: 'Cuts',
+    icon: 'i-heroicons-scissors',
+    active: tab.value === 'cuts',
+    click: () => void (tab.value = 'cuts'),
+  },
+  {
     label: 'Warnings',
     icon: 'i-heroicons-exclamation-triangle',
     active: tab.value === 'warnings',
@@ -111,6 +117,7 @@ const editProject = useEditProject();
       <div class="absolute inset-0 overflow-auto">
         <BomTab v-if="tab === 'bom'" />
         <StockTab v-else-if="tab === 'boards'" />
+        <CutsTab v-else-if="tab === 'cuts'" />
         <WarningsTab v-else-if="tab === 'warnings'" class="p-8" />
         <SettingsTab v-else-if="tab === 'settings'" class="p-8" />
       </div>

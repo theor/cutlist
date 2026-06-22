@@ -3,7 +3,14 @@ import { type BoardLayout, generateCuts } from '@aklinker1/cutlist';
 
 const props = defineProps<{
   layout: BoardLayout;
+  layoutIndex: number;
 }>();
+
+const hoveredCut = useHoveredCut();
+const bladeWidthM = useBladeWidthM();
+const isHighlighted = (order: number) =>
+  hoveredCut.value?.layout === props.layoutIndex &&
+  hoveredCut.value?.order === order;
 
 // Pixels per meter, matching useGetPx (`value * 500`).
 const PX_PER_M = 500;
@@ -16,15 +23,10 @@ const hPx = computed(() => props.layout.stock.lengthM * PX_PER_M);
 const toX = (m: number) => m * PX_PER_M;
 const toY = (m: number) => (props.layout.stock.lengthM - m) * PX_PER_M;
 
-// Distinct hue per cut, spread evenly around the wheel so neighbouring cuts
-// (which are often next to each other on the board) are easy to tell apart.
-const colorFor = (index: number, count: number) =>
-  `hsl(${Math.round((index * 360) / Math.max(count, 1))}, 75%, 45%)`;
-
 const cuts = computed(() => {
-  const raw = generateCuts(props.layout);
-  return raw.map((cut, i) => {
-    const color = colorFor(i, raw.length);
+  const raw = generateCuts(props.layout, { minLeftoverM: bladeWidthM.value });
+  return raw.map((cut) => {
+    const color = cutColor(cut.order, raw.length);
 
     // tail = where the numbered badge sits, head = where the arrow points.
     let tx: number, ty: number, hx: number, hy: number;
@@ -81,18 +83,31 @@ const cuts = computed(() => {
     :height="hPx"
     :viewBox="`0 0 ${wPx} ${hPx}`"
   >
-    <g v-for="cut of cuts" :key="cut.order">
+    <g
+      v-for="cut of cuts"
+      :key="cut.order"
+      :opacity="
+        hoveredCut?.layout === layoutIndex && !isHighlighted(cut.order)
+          ? 0.15
+          : 1
+      "
+    >
       <line
         :x1="cut.x1"
         :y1="cut.y1"
         :x2="cut.x2"
         :y2="cut.y2"
         :stroke="cut.color"
-        stroke-width="2"
+        :stroke-width="isHighlighted(cut.order) ? 4 : 2"
         stroke-dasharray="6 4"
       />
       <polygon :points="cut.arrow" :fill="cut.color" />
-      <circle :cx="cut.labelX" :cy="cut.labelY" r="9" :fill="cut.color" />
+      <circle
+        :cx="cut.labelX"
+        :cy="cut.labelY"
+        :r="isHighlighted(cut.order) ? 12 : 9"
+        :fill="cut.color"
+      />
       <text
         :x="cut.labelX"
         :y="cut.labelY"

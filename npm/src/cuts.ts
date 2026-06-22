@@ -50,8 +50,15 @@ interface Rect {
  *
  * Parts that can't be separated by a guillotine cut (non-guillotine layouts)
  * are left without cuts rather than producing an invalid sequence.
+ *
+ * `minLeftoverM` is the smallest empty margin worth a dedicated trim cut.
+ * Anything smaller is just the saw kerf between adjacent parts, not a reusable
+ * offcut, so it's left alone. Defaults to 1/8" (a typical blade kerf).
  */
-export function generateCuts(layout: BoardLayout, precision = 1e-5): Cut[] {
+export function generateCuts(
+  layout: BoardLayout,
+  { precision = 1e-5, minLeftoverM = 0.003175 } = {},
+): Cut[] {
   const cuts: Omit<Cut, 'order'>[] = [];
   const region: Rect = {
     left: 0,
@@ -61,7 +68,7 @@ export function generateCuts(layout: BoardLayout, precision = 1e-5): Cut[] {
   };
   const parts: Rect[] = layout.placements.map((p) => placementRect(p));
 
-  recurse(region, parts, cuts, precision);
+  recurse(region, parts, cuts, precision, minLeftoverM);
 
   return cuts.map((cut, i) => ({ ...cut, order: i + 1 }));
 }
@@ -80,8 +87,15 @@ function recurse(
   parts: Rect[],
   cuts: Omit<Cut, 'order'>[],
   precision: number,
+  minLeftoverM: number,
 ): void {
   if (parts.length <= 1) return;
+
+  // First peel off any empty margin around the parts. Otherwise a later
+  // separating cut would run all the way across the region and slice the empty
+  // leftover into pieces. Trimming keeps each offcut a single rectangle and
+  // shrinks the region so subsequent cuts only span the parts.
+  region = trimEmptyMargins(region, parts, cuts, minLeftoverM);
 
   const split = findSplit(region, parts, precision);
   if (split == null) return;
@@ -90,8 +104,90 @@ function recurse(
   // Order matters for the final numbering: process the "near" side (the piece
   // physically freed by this cut) before the rest, so its rips follow its
   // crosscut. `near` is always the lower/left group.
-  recurse(split.nearRegion, split.nearParts, cuts, precision);
-  recurse(split.farRegion, split.farParts, cuts, precision);
+  recurse(split.nearRegion, split.nearParts, cuts, precision, minLeftoverM);
+  recurse(split.farRegion, split.farParts, cuts, precision, minLeftoverM);
+}
+
+function boundingBox(parts: Rect[]): Rect {
+  return {
+    left: Math.min(...parts.map((p) => p.left)),
+    right: Math.max(...parts.map((p) => p.right)),
+    bottom: Math.min(...parts.map((p) => p.bottom)),
+    top: Math.max(...parts.map((p) => p.top)),
+  };
+}
+
+/**
+ * Cut away the empty margins between the region edges and the parts' bounding
+ * box, emitting one cut per margin. At each step the margin that frees the
+ * largest single rectangle is cut first, so the biggest reusable offcut is kept
+ * whole instead of being fragmented by a later separating cut.
+ */
+function trimEmptyMargins(
+  region: Rect,
+  parts: Rect[],
+  cuts: Omit<Cut, 'order'>[],
+  minLeftoverM: number,
+): Rect {
+  let r = region;
+  for (;;) {
+    const bb = boundingBox(parts);
+    const candidates: { area: number; cut: Omit<Cut, 'order'>; next: Rect }[] =
+      [];
+    const height = r.top - r.bottom;
+    const width = r.right - r.left;
+
+    if (r.right - bb.right > minLeftoverM)
+      candidates.push({
+        area: (r.right - bb.right) * height,
+        cut: {
+          orientation: 'rip',
+          posM: bb.right,
+          startM: r.bottom,
+          endM: r.top,
+        },
+        next: { ...r, right: bb.right },
+      });
+    if (bb.left - r.left > minLeftoverM)
+      candidates.push({
+        area: (bb.left - r.left) * height,
+        cut: {
+          orientation: 'rip',
+          posM: bb.left,
+          startM: r.bottom,
+          endM: r.top,
+        },
+        next: { ...r, left: bb.left },
+      });
+    if (r.top - bb.top > minLeftoverM)
+      candidates.push({
+        area: (r.top - bb.top) * width,
+        cut: {
+          orientation: 'crosscut',
+          posM: bb.top,
+          startM: r.left,
+          endM: r.right,
+        },
+        next: { ...r, top: bb.top },
+      });
+    if (bb.bottom - r.bottom > minLeftoverM)
+      candidates.push({
+        area: (bb.bottom - r.bottom) * width,
+        cut: {
+          orientation: 'crosscut',
+          posM: bb.bottom,
+          startM: r.left,
+          endM: r.right,
+        },
+        next: { ...r, bottom: bb.bottom },
+      });
+
+    if (candidates.length === 0) return r;
+
+    candidates.sort((a, b) => b.area - a.area);
+    cuts.push(candidates[0].cut);
+    r = candidates[0].next;
+  }
 }
 
 interface Split {
