@@ -58,6 +58,7 @@ const tab = useProjectTab();
 
 const project = useProject();
 const editProject = useEditProject();
+const isExpanded = useIsExpanded();
 </script>
 
 <template>
@@ -114,6 +115,14 @@ const editProject = useEditProject();
           color="gray"
           size="sm"
           @click="dumpTestCase"
+        />
+        <UButton
+          class="print:hidden"
+          title="Collapse sidebar"
+          icon="i-heroicons-chevron-double-left"
+          color="gray"
+          size="sm"
+          @click="isExpanded = true"
         />
       </div>
 

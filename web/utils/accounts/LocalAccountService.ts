@@ -10,9 +10,11 @@ export function createLocalAccountService(): AccountService {
     bladeWidth: '@cutlist/blade-width',
     distanceUnit: '@cutlist/distance-unit',
     extraSpace: '@cutlist/extra-space',
+    maxCutLength: '@cutlist/max-cut-length',
     optimize: '@cutlist/optimize',
     showPartNumbers: '@cutlist/use-part-numbers',
     showPartNames: '@cutlist/show-part-names',
+    showCabinetNames: '@cutlist/show-cabinet-names',
     stock: '@cutlist/stock',
   };
   const projectsStorageKey = '@cutlist/projects';
@@ -48,6 +50,11 @@ export function createLocalAccountService(): AccountService {
     );
     if (extraSpace != null) settings.extraSpace = extraSpace;
 
+    const maxCutLength = parseNumber(
+      localStorage.getItem(getKey('maxCutLength', projectId)),
+    );
+    if (maxCutLength != null) settings.maxCutLength = maxCutLength;
+
     const optimize = localStorage.getItem(getKey('optimize', projectId));
     if (optimize != null)
       settings.optimize = optimize as AccountSettings['optimize'];
@@ -61,6 +68,11 @@ export function createLocalAccountService(): AccountService {
       localStorage.getItem(getKey('showPartNames', projectId)),
     );
     if (showPartNames != null) settings.showPartNames = showPartNames;
+
+    const showCabinetNames = parseBoolean(
+      localStorage.getItem(getKey('showCabinetNames', projectId)),
+    );
+    if (showCabinetNames != null) settings.showCabinetNames = showCabinetNames;
 
     const distanceUnit = localStorage.getItem(
       getKey('distanceUnit', projectId),

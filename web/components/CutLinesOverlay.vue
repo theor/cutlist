@@ -8,6 +8,7 @@ const props = defineProps<{
 
 const hoveredCut = useHoveredCut();
 const bladeWidthM = useBladeWidthM();
+const maxCutLengthM = useMaxCutLengthM();
 const isHighlighted = (order: number) =>
   hoveredCut.value?.layout === props.layoutIndex &&
   hoveredCut.value?.order === order;
@@ -24,7 +25,10 @@ const toX = (m: number) => m * PX_PER_M;
 const toY = (m: number) => (props.layout.stock.lengthM - m) * PX_PER_M;
 
 const cuts = computed(() => {
-  const raw = generateCuts(props.layout, { minLeftoverM: bladeWidthM.value });
+  const raw = generateCuts(props.layout, {
+    minLeftoverM: bladeWidthM.value,
+    maxCutLengthM: maxCutLengthM.value,
+  });
   return raw.map((cut) => {
     const color = cutColor(cut.order, raw.length);
 

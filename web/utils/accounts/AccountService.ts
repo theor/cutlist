@@ -19,9 +19,14 @@ export interface AccountSettings {
   bladeWidth: number;
   distanceUnit: 'in' | 'm' | 'mm';
   extraSpace: number;
+  /**
+   * Longest a single cut may be, in `distanceUnit`. 0 means no limit.
+   */
+  maxCutLength: number;
   optimize: 'Cuts' | 'Space';
   showPartNumbers: boolean;
   showPartNames: boolean;
+  showCabinetNames: boolean;
   stock: string;
 }
 
@@ -44,8 +49,10 @@ export const DEFAULT_SETTINGS: AccountSettings = {
   bladeWidth: 0.125,
   distanceUnit: 'in',
   extraSpace: 0,
+  maxCutLength: 48,
   optimize: 'Cuts',
   showPartNumbers: true,
   showPartNames: false,
+  showCabinetNames: false,
   stock: YAML.dump(DEFAULT_STOCK, { indent: 2, flowLevel: 2 }),
 };

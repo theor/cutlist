@@ -5,11 +5,24 @@ const container = ref<HTMLDivElement>();
 const { scale, resetZoom, zoomIn, zoomOut } = usePanZoom(container);
 const showDimensions = useShowDimensions();
 const showCuts = useShowCuts();
+const isExpanded = useIsExpanded();
 const printPage = () => window.print();
 </script>
 
 <template>
   <div>
+    <!-- Show sidebar (only when collapsed) -->
+    <UButton
+      v-if="isExpanded"
+      class="absolute top-4 left-4 z-10 bg-black dark:bg-white shadow-2xl print:hidden"
+      title="Show sidebar"
+      square
+      size="lg"
+      color="black"
+      icon="i-heroicons-chevron-double-right"
+      @click="isExpanded = false"
+    />
+
     <!-- Cutlist Preview -->
     <div
       class="absolute inset-0 overflow-none border-t-4 border-gray-300 dark:border-gray-800 flex print:static print:overflow-visible print:border-none"

@@ -5,9 +5,11 @@ const {
   bladeWidth,
   distanceUnit,
   extraSpace,
+  maxCutLength,
   optimize,
   showPartNumbers,
   showPartNames,
+  showCabinetNames,
   isLoading,
   changes,
   resetSettings: resetLocal,
@@ -24,6 +26,7 @@ watch(distanceUnit, (newUnit, oldUnit) => {
   };
   convertDistance(bladeWidth);
   convertDistance(extraSpace);
+  convertDistance(maxCutLength);
 });
 
 const projectId = useProjectId();
@@ -57,6 +60,13 @@ function reset() {
       <UInput v-model="extraSpace" type="number" />
     </UFormGroup>
 
+    <UFormGroup
+      :label="`Max cut length (${distanceUnit}):`"
+      help="Break boards down so no cut is longer than this. 0 disables the limit."
+    >
+      <UInput v-model="maxCutLength" type="number" min="0" />
+    </UFormGroup>
+
     <UFormGroup label="Optimize for:">
       <USelect v-model="optimize" :options="['Cuts', 'Space']" />
     </UFormGroup>
@@ -64,6 +74,11 @@ function reset() {
     <UCheckbox v-model="showPartNumbers" label="Show part numbers in preview" />
 
     <UCheckbox v-model="showPartNames" label="Show part names in preview" />
+
+    <UCheckbox
+      v-model="showCabinetNames"
+      label="Show cabinet names in preview"
+    />
 
     <div class="flex flex-row-reverse gap-4">
       <UButton type="submit" :loading="isSaving">Save Changes</UButton>

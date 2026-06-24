@@ -6,6 +6,7 @@ const formatDistance = useFormatDistance();
 const hoveredCut = useHoveredCut();
 const showCuts = useShowCuts();
 const bladeWidthM = useBladeWidthM();
+const maxCutLengthM = useMaxCutLengthM();
 
 // Opening this tab is a clear signal the user wants to see the cuts, so make
 // sure the overlay is on (otherwise hovering a row would highlight nothing).
@@ -15,7 +16,10 @@ onMounted(() => {
 
 const boards = computed(() =>
   (data.value?.layouts ?? []).map((layout, layoutIndex) => {
-    const rawCuts = generateCuts(layout, { minLeftoverM: bladeWidthM.value });
+    const rawCuts = generateCuts(layout, {
+      minLeftoverM: bladeWidthM.value,
+      maxCutLengthM: maxCutLengthM.value,
+    });
     const cuts = rawCuts.map((cut) => ({
       order: cut.order,
       color: cutColor(cut.order, rawCuts.length),

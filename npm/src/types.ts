@@ -48,6 +48,10 @@ export interface PartToCut {
   partNumber: number;
   instanceNumber: number;
   name: string;
+  /**
+   * Optional name of the assembly/cabinet this part belongs to.
+   */
+  cabinet?: string;
   material: string;
   size: {
     /**
@@ -108,6 +112,7 @@ export interface BoardLayoutLeftover {
   partNumber: number;
   instanceNumber: number;
   name: string;
+  cabinet?: string;
   material: string;
   widthM: number;
   lengthM: number;

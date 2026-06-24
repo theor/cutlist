@@ -9,7 +9,7 @@ const isExpanded = useIsExpanded();
     <ClientOnly>
       <ProjectSidebar
         v-if="!isExpanded"
-        class="bg-gray-50 dark:bg-gray-800 shrink-0 min-w-[28rem] relative z-10 print:hidden"
+        class="bg-gray-50 dark:bg-gray-800 shrink-0 w-full sm:w-auto sm:min-w-[28rem] relative z-10 print:hidden"
       />
     </ClientOnly>
 

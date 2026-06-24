@@ -34,6 +34,12 @@ export function parseCutlistCsv(csv: string): PartToCut[] {
       throw new Error(`Cutlist CSV is missing the "${key}" column`);
   }
 
+  // Optional: a column naming the assembly/cabinet each part belongs to.
+  const cabinetCol = ['cabinet', 'cabinet name', 'assembly'].reduce(
+    (found, name) => (found >= 0 ? found : header.indexOf(name)),
+    -1,
+  );
+
   const inchesToM = (value: string | undefined) =>
     new Distance(`${parseFloat(value ?? '') || 0}in`).m;
 
@@ -53,9 +59,11 @@ export function parseCutlistCsv(csv: string): PartToCut[] {
       thickness: inchesToM(cells[col.thickness]),
     };
     const material = cells[col.material]?.trim() ?? '';
+    const cabinet =
+      cabinetCol >= 0 ? cells[cabinetCol]?.trim() || undefined : undefined;
 
     for (let instanceNumber = 1; instanceNumber <= qty; instanceNumber++) {
-      parts.push({ partNumber, instanceNumber, name, material, size });
+      parts.push({ partNumber, instanceNumber, name, cabinet, material, size });
     }
   }
   return parts;

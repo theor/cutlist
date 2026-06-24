@@ -5,7 +5,7 @@ const isExpanded = useIsExpanded();
 <template>
   <div class="flex">
     <UButton
-      title="Expand Preview"
+      :title="isExpanded ? 'Show sidebar' : 'Expand preview'"
       square
       size="lg"
       color="black"

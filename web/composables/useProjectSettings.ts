@@ -16,9 +16,11 @@ export default function () {
   const bladeWidth = defineSettingValue('bladeWidth');
   const distanceUnit = defineSettingValue('distanceUnit');
   const extraSpace = defineSettingValue('extraSpace');
+  const maxCutLength = defineSettingValue('maxCutLength');
   const optimize = defineSettingValue('optimize');
   const showPartNumbers = defineSettingValue('showPartNumbers');
   const showPartNames = defineSettingValue('showPartNames');
+  const showCabinetNames = defineSettingValue('showCabinetNames');
   const stock = defineSettingValue('stock');
 
   const { data: settings, isLoading } = useSettingsQuery(projectId);
@@ -35,12 +37,16 @@ export default function () {
       changes.distanceUnit = distanceUnit.value;
     if (settings.value?.extraSpace !== extraSpace.value)
       changes.extraSpace = extraSpace.value;
+    if (settings.value?.maxCutLength !== maxCutLength.value)
+      changes.maxCutLength = maxCutLength.value;
     if (settings.value?.optimize !== optimize.value)
       changes.optimize = optimize.value;
     if (settings.value?.showPartNumbers !== showPartNumbers.value)
       changes.showPartNumbers = showPartNumbers.value;
     if (settings.value?.showPartNames !== showPartNames.value)
       changes.showPartNames = showPartNames.value;
+    if (settings.value?.showCabinetNames !== showCabinetNames.value)
+      changes.showCabinetNames = showCabinetNames.value;
     if (settings.value?.stock !== stock.value) changes.stock = stock.value;
     return changes;
   });
@@ -49,9 +55,11 @@ export default function () {
     bladeWidth.value = settings.value?.bladeWidth;
     distanceUnit.value = settings.value?.distanceUnit;
     extraSpace.value = settings.value?.extraSpace;
+    maxCutLength.value = settings.value?.maxCutLength;
     optimize.value = settings.value?.optimize;
     showPartNumbers.value = settings.value?.showPartNumbers;
     showPartNames.value = settings.value?.showPartNames;
+    showCabinetNames.value = settings.value?.showCabinetNames;
   };
   const resetStock = () => {
     stock.value = settings.value?.stock;
@@ -61,9 +69,11 @@ export default function () {
     bladeWidth,
     distanceUnit,
     extraSpace,
+    maxCutLength,
     optimize,
     showPartNumbers,
     showPartNames,
+    showCabinetNames,
     stock,
     resetSettings,
     resetStock,

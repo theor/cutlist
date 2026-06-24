@@ -36,6 +36,16 @@ Ply,0.75,4,8,1,Shelf`,
     expect(parts[0].size.width).toBeCloseTo(new Distance('4in').m, 9);
   });
 
+  it('reads an optional cabinet column when present', () => {
+    const parts = parseCutlistCsv(
+      `Cabinet,Part,Qty,Length,Width,Thickness,Material
+Base,Side,2,30,12,0.75,Ply`,
+    );
+    expect(parts.every((p) => p.cabinet === 'Base')).toBe(true);
+    // No cabinet column => undefined, not an error.
+    expect(parseCutlistCsv(CSV)[0].cabinet).toBeUndefined();
+  });
+
   it('throws when a required column is missing', () => {
     expect(() => parseCutlistCsv('Part,Qty,Length,Width\nA,1,2,3')).toThrow(
       /thickness/i,

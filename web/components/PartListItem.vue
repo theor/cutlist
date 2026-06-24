@@ -34,7 +34,8 @@ const fontSize = usePx(() =>
   ),
 );
 
-const { showPartNumbers, showPartNames } = useProjectSettings();
+const { showPartNumbers, showPartNames, showCabinetNames } =
+  useProjectSettings();
 const showDimensions = useShowDimensions();
 
 const partWidth = useFormattedDistance(() => props.placement.widthM);
@@ -45,6 +46,8 @@ const partLength = useFormattedDistance(() => props.placement.lengthM);
 // of text that can be rotated as a unit.
 const labelLines = computed(() => {
   const lines: string[] = [];
+  if (showCabinetNames.value && props.placement.cabinet)
+    lines.push(props.placement.cabinet);
   if (showPartNames.value && props.placement.name)
     lines.push(props.placement.name);
   if (showDimensions.value && partWidth.value && partLength.value)
