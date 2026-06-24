@@ -7,16 +7,30 @@ import {
 } from '@aklinker1/cutlist';
 
 export default function () {
-  const url = useAssemblyUrl();
+  const project = useProject();
   const { bladeWidth, optimize, extraSpace, distanceUnit, stock } =
     useProjectSettings();
   const parseStock = useParseStock();
 
+  const source = computed(() => project.value?.source);
   const partsQuery = useQuery({
-    queryKey: ['onshape', 'board-layouts', url],
-    queryFn: () =>
-      $fetch<PartToCut[]>('/api/parts', { query: { url: url.value! } }),
-    enabled: computed(() => url.value != null),
+    queryKey: ['parts', computed(() => JSON.stringify(source.value ?? null))],
+    queryFn: () => {
+      const src = source.value;
+      if (src?.type === 'onshape')
+        return $fetch<PartToCut[]>('/api/parts', { query: { url: src.url } });
+      if (src?.type === 'scad')
+        return $fetch<PartToCut[]>('/api/scad-parts', {
+          query: { path: src.path },
+        });
+      return Promise.resolve([] as PartToCut[]);
+    },
+    enabled: computed(() => {
+      const src = source.value;
+      if (src?.type === 'onshape') return !!src.url;
+      if (src?.type === 'scad') return !!src.path;
+      return false;
+    }),
   });
 
   const regenerateKey = ref(0);

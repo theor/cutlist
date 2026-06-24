@@ -1,8 +1,13 @@
 <script lang="ts" setup>
 import type { BoardLayoutLeftover } from '@aklinker1/cutlist';
 
-const url = useAssemblyUrl();
-const { data: doc } = useDocumentQuery(url);
+const project = useProject();
+const hasSource = computed(() => {
+  const source = project.value?.source;
+  if (source?.type === 'onshape') return !!source.url;
+  if (source?.type === 'scad') return !!source.path;
+  return false;
+});
 const { data, isLoading } = useBoardLayoutsQuery();
 const { distanceUnit } = useProjectSettings();
 const formatDistance = useFormatDistance();
@@ -67,8 +72,8 @@ const onMouseLeave = () => {
     @mousemove="onMouseMove"
     @mouseleave="onMouseLeave"
   >
-    <p v-if="doc == null" class="text-center p-4 opacity-50">
-      Enter an assembly URL to get started...
+    <p v-if="!hasSource" class="text-center p-4 opacity-50">
+      Configure a source to get started...
     </p>
     <UTable v-else :rows="rows" :loading="isLoading" />
   </div>

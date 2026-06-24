@@ -3,11 +3,12 @@ export default function () {
 
   return computed<string | undefined>({
     get() {
-      return project.value?.source.url;
+      const source = project.value?.source;
+      return source?.type === 'onshape' ? source.url : undefined;
     },
     set(value) {
-      if (!project.value) return;
-      project.value.source.url = value ?? '';
+      const source = project.value?.source;
+      if (source?.type === 'onshape') source.url = value ?? '';
     },
   });
 }

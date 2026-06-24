@@ -67,11 +67,24 @@ const editProject = useEditProject();
         v-if="project"
         class="mx-2 mt-2 p-2 pl-3 flex gap-2 items-center print:m-0 print:p-0"
       >
-        <OnshapeProjectDetails :url="project.source.url" />
+        <OnshapeProjectDetails
+          v-if="project.source.type === 'onshape'"
+          :url="project.source.url"
+        />
+        <div v-else class="flex-1 page-break-after">
+          <h1 class="text-lg font-medium">{{ project.name }}</h1>
+          <p class="text-sm opacity-50 truncate" :title="project.source.path">
+            OpenSCAD &bull; {{ project.source.path }}
+          </p>
+        </div>
 
         <UButton
           class="print:hidden"
-          title="Get latest parts from Onshape"
+          :title="
+            project.source.type === 'scad'
+              ? 'Re-run OpenSCAD export'
+              : 'Get latest parts from Onshape'
+          "
           :icon="isFetchingLayouts ? undefined : 'i-heroicons-arrow-path'"
           color="gray"
           size="sm"
