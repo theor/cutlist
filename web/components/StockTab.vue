@@ -4,7 +4,6 @@ const { stock, resetStock } = useProjectSettings();
 const projectId = useProjectId();
 const { mutate: _save, isPending: isSaving } = useSetSettingsMutation();
 function save() {
-  console.log('SAVING...');
   _save({
     projectId: projectId.value,
     changes: { stock: stock.value },

@@ -1,5 +1,9 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, doc } from 'firebase/firestore';
+import {
+  initializeFirestore,
+  getFirestore,
+  collection,
+} from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 export const firebaseApp = initializeApp({
@@ -11,7 +15,19 @@ export const firebaseApp = initializeApp({
   appId: '1:149400144857:web:fa6f4a90ec177fd90ce7c8',
 });
 
-export const db = getFirestore(firebaseApp);
+// `ignoreUndefinedProperties` so a save isn't rejected outright when a settings
+// field is undefined (e.g. not yet loaded) — those keys are just skipped.
+// initializeFirestore throws if it already ran (e.g. on HMR), so fall back.
+function createDb() {
+  try {
+    return initializeFirestore(firebaseApp, {
+      ignoreUndefinedProperties: true,
+    });
+  } catch {
+    return getFirestore(firebaseApp);
+  }
+}
+export const db = createDb();
 export const usersRef = collection(db, 'users');
 
 export const firebaseAuth = getAuth(firebaseApp);

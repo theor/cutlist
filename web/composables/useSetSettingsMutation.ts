@@ -13,8 +13,11 @@ export default function () {
       projectId: string | undefined;
       changes: Partial<AccountSettings>;
     }) {
-      console.log('SAVING...', { changes });
       return accountService.value.setSettings(projectId, changes);
+    },
+    onError(error) {
+      // Don't let a failed save (e.g. Firestore rejecting the write) be silent.
+      console.error('Failed to save settings:', error);
     },
     onSettled() {
       client.invalidateQueries({
