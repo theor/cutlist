@@ -42,10 +42,22 @@ export function createCutPacker<T>(visualizer?: Visualizer): Packer<T> {
         };
       });
 
+  // Portrait by default (length running up the board). When `rotateAll` is set,
+  // force the opposite (landscape) so every part is turned 90°.
+  const orientate = <T>(
+    rect: Rectangle<T>,
+    rotateAll?: boolean,
+  ): Rectangle<T> =>
+    rotateAll
+      ? rect.width < rect.height
+        ? rect.flipOrientation()
+        : rect
+      : orientateLengthWise(rect);
+
   return {
     pack(bin, rects, options) {
       rects = rects
-        .map((rect) => orientateLengthWise(rect))
+        .map((rect) => orientate(rect, options.rotateAll))
         .toSorted((a, b) => {
           if (!isNearlyEqual(a.height, b.height, options.precision))
             return b.height - a.height;
@@ -134,14 +146,16 @@ export function createCutPacker<T>(visualizer?: Visualizer): Packer<T> {
           };
         });
 
-      // Tightly pack each row's bin, so the major cuts aren't effected.
+      // Tightly pack the parts that didn't fit into rows. Rotation is allowed
+      // here (when enabled) so a leftover part can turn 90° to fill a gap.
       const tightRes: PackResult<T> = {
         placements: [...res.placements],
         leftovers: [],
       };
+      // Leftovers are already oriented above, so don't re-rotate them here.
       tight.addToPack(tightRes, bin, res.leftovers, {
         ...options,
-        allowRotations: false,
+        rotateAll: false,
       });
 
       return tightRes;

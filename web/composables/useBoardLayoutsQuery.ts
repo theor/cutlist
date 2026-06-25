@@ -5,8 +5,15 @@ import {
 } from '@aklinker1/cutlist';
 
 export default function () {
-  const { bladeWidth, optimize, extraSpace, distanceUnit, stock } =
-    useProjectSettings();
+  const {
+    bladeWidth,
+    optimize,
+    extraSpace,
+    allowRotations,
+    rotateAll,
+    distanceUnit,
+    stock,
+  } = useProjectSettings();
   const parseStock = useParseStock();
 
   const partsQuery = usePartsQuery();
@@ -38,6 +45,9 @@ export default function () {
       bladeWidth: new Distance(bladeWidth.value + distanceUnit.value).m,
       extraSpace: new Distance(extraSpace.value + distanceUnit.value).m,
       optimize: optimize.value === 'Cuts' ? 'cuts' : 'space',
+      allowRotations: allowRotations.value ?? true,
+      // Only applies when rotation-to-fit is off.
+      rotateAll: !allowRotations.value && (rotateAll.value ?? false),
       precision: 1e-5,
     };
     return generateBoardLayouts(toRaw(parts), parseStock(stock.value), config);
@@ -63,6 +73,9 @@ export default function () {
       bladeWidth: new Distance(bladeWidth.value + distanceUnit.value).m,
       extraSpace: new Distance(extraSpace.value + distanceUnit.value).m,
       optimize: optimize.value === 'Cuts' ? 'cuts' : 'space',
+      allowRotations: allowRotations.value ?? true,
+      // Only applies when rotation-to-fit is off.
+      rotateAll: !allowRotations.value && (rotateAll.value ?? false),
       precision: 1e-5,
     };
 

@@ -6,6 +6,8 @@ const {
   distanceUnit,
   extraSpace,
   maxCutLength,
+  allowRotations,
+  rotateAll,
   optimize,
   showPartNumbers,
   showPartNames,
@@ -70,6 +72,17 @@ function reset() {
     <UFormGroup label="Optimize for:">
       <USelect v-model="optimize" :options="['Cuts', 'Space']" />
     </UFormGroup>
+
+    <UCheckbox
+      v-model="allowRotations"
+      label="Allow rotating parts 90° to fit"
+    />
+
+    <UCheckbox
+      v-model="rotateAll"
+      :disabled="allowRotations"
+      label="Rotate every part 90°"
+    />
 
     <UCheckbox v-model="showPartNumbers" label="Show part numbers in preview" />
 

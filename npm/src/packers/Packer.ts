@@ -21,6 +21,11 @@ export interface PackOptions {
   gap: number;
   precision: number;
   allowRotations: boolean;
+  /**
+   * Rotate every part 90° from its default orientation. Independent of
+   * `allowRotations` (which rotates per-part only when it helps a part fit).
+   */
+  rotateAll?: boolean;
 }
 
 export interface PackResult<T> {

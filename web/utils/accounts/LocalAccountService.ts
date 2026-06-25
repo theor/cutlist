@@ -11,6 +11,8 @@ export function createLocalAccountService(): AccountService {
     distanceUnit: '@cutlist/distance-unit',
     extraSpace: '@cutlist/extra-space',
     maxCutLength: '@cutlist/max-cut-length',
+    allowRotations: '@cutlist/allow-rotations',
+    rotateAll: '@cutlist/rotate-all',
     optimize: '@cutlist/optimize',
     showPartNumbers: '@cutlist/use-part-numbers',
     showPartNames: '@cutlist/show-part-names',
@@ -54,6 +56,16 @@ export function createLocalAccountService(): AccountService {
       localStorage.getItem(getKey('maxCutLength', projectId)),
     );
     if (maxCutLength != null) settings.maxCutLength = maxCutLength;
+
+    const allowRotations = parseBoolean(
+      localStorage.getItem(getKey('allowRotations', projectId)),
+    );
+    if (allowRotations != null) settings.allowRotations = allowRotations;
+
+    const rotateAll = parseBoolean(
+      localStorage.getItem(getKey('rotateAll', projectId)),
+    );
+    if (rotateAll != null) settings.rotateAll = rotateAll;
 
     const optimize = localStorage.getItem(getKey('optimize', projectId));
     if (optimize != null)

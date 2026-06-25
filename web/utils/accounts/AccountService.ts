@@ -23,6 +23,8 @@ export interface AccountSettings {
    * Longest a single cut may be, in `distanceUnit`. 0 means no limit.
    */
   maxCutLength: number;
+  allowRotations: boolean;
+  rotateAll: boolean;
   optimize: 'Cuts' | 'Space';
   showPartNumbers: boolean;
   showPartNames: boolean;
@@ -50,6 +52,8 @@ export const DEFAULT_SETTINGS: AccountSettings = {
   distanceUnit: 'in',
   extraSpace: 0,
   maxCutLength: 48,
+  allowRotations: true,
+  rotateAll: false,
   optimize: 'Cuts',
   showPartNumbers: true,
   showPartNames: false,

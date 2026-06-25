@@ -64,6 +64,8 @@ export function createGenericPacker<T>({
     },
     addToPack(res, bin, rects, options) {
       return rects.reduce<PackResult<T>>((res, rect) => {
+        // Force every part 90° from its input orientation when requested.
+        if (options.rotateAll) rect = rect.flipOrientation();
         visualizer?.render('start', { res, bin, toPlace: rect });
         const possiblePoints = getPossiblePlacements(
           bin,

@@ -361,7 +361,8 @@ function minimizeLayoutStock(
 
 function getPackerOptions(config: Config): PackOptions {
   return {
-    allowRotations: true,
+    allowRotations: config.allowRotations,
+    rotateAll: config.rotateAll,
     gap: new Distance(config.bladeWidth).m,
     precision: config.precision,
   };

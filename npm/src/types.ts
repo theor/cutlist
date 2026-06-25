@@ -89,6 +89,16 @@ export const Config = z.object({
    * Extra padding to add to the top and right sides of the boards/stock.
    */
   extraSpace: Distance.default('0'),
+  /**
+   * Allow parts to be rotated 90° to fit better. Disable for materials with a
+   * grain direction that must be preserved.
+   */
+  allowRotations: z.boolean().default(true),
+  /**
+   * Rotate every part 90° from its default orientation. Only meaningful when
+   * `allowRotations` is off (otherwise parts already rotate freely to fit).
+   */
+  rotateAll: z.boolean().default(false),
   precision: z.number().default(1e-5),
 });
 export type Config = z.infer<typeof Config>;

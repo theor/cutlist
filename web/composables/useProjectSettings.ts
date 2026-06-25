@@ -17,6 +17,8 @@ export default function () {
   const distanceUnit = defineSettingValue('distanceUnit');
   const extraSpace = defineSettingValue('extraSpace');
   const maxCutLength = defineSettingValue('maxCutLength');
+  const allowRotations = defineSettingValue('allowRotations');
+  const rotateAll = defineSettingValue('rotateAll');
   const optimize = defineSettingValue('optimize');
   const showPartNumbers = defineSettingValue('showPartNumbers');
   const showPartNames = defineSettingValue('showPartNames');
@@ -39,6 +41,10 @@ export default function () {
       changes.extraSpace = extraSpace.value;
     if (settings.value?.maxCutLength !== maxCutLength.value)
       changes.maxCutLength = maxCutLength.value;
+    if (settings.value?.allowRotations !== allowRotations.value)
+      changes.allowRotations = allowRotations.value;
+    if (settings.value?.rotateAll !== rotateAll.value)
+      changes.rotateAll = rotateAll.value;
     if (settings.value?.optimize !== optimize.value)
       changes.optimize = optimize.value;
     if (settings.value?.showPartNumbers !== showPartNumbers.value)
@@ -56,6 +62,8 @@ export default function () {
     distanceUnit.value = settings.value?.distanceUnit;
     extraSpace.value = settings.value?.extraSpace;
     maxCutLength.value = settings.value?.maxCutLength;
+    allowRotations.value = settings.value?.allowRotations;
+    rotateAll.value = settings.value?.rotateAll;
     optimize.value = settings.value?.optimize;
     showPartNumbers.value = settings.value?.showPartNumbers;
     showPartNames.value = settings.value?.showPartNames;
@@ -70,6 +78,8 @@ export default function () {
     distanceUnit,
     extraSpace,
     maxCutLength,
+    allowRotations,
+    rotateAll,
     optimize,
     showPartNumbers,
     showPartNames,
